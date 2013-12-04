@@ -343,8 +343,7 @@ public:
 		Eigen::Vector4f xyz_centroid;
 
 		compute3DCentroid(*cloud_ptr, xyz_centroid);
-		computeCovarianceMatrixNormalized(*cloud_ptr, xyz_centroid,
-				covariance_matrix);
+		computeCovarianceMatrixNormalized(*cloud_ptr, xyz_centroid,covariance_matrix);
 
 		//Eigen::Vector4f min_p, max_p;
 		//getMinMax3D(*cloud_ptr, min_p, max_p);

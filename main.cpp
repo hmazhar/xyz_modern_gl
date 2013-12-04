@@ -112,6 +112,43 @@ void TimerFunc(int value) {
 	}
 }
 
+void Histogram_(vector<vec3> &data, vector<int> &hist, vec3 min_p, vec3 max_p) {
+	int BIN_COUNT = 256;
+	hist.clear();
+	hist.resize(BIN_COUNT, 0);
+	float h = (max_p.y - min_p.y) / float(BIN_COUNT);
+	//float h = (0.230561f + 0.230561f) / float(BIN_COUNT);
+
+	unsigned int bin;
+	for (int i = 0; i < data.size(); i++) {
+		float sample = data[i].y;
+		bin = BIN_COUNT;
+		for (unsigned int binNum = 0; binNum < BIN_COUNT; ++binNum) {
+			float rightEdge = min_p.y + binNum * h;
+			if (sample <= rightEdge) {
+				bin = binNum;
+				break;
+			}
+		}
+		hist[bin]++;
+	}
+}
+void DumpHist(vector<vector<vec3> > all_data, string fname, vec3 min_p, vec3 max_p) {
+	vector<vector<int> > histograms(all_data.size());
+
+	for (int i = 0; i < all_data.size(); i++) {
+		Histogram_(all_data[i], histograms[i], min_p, max_p);
+	}
+
+	ofstream ofile(fname);
+	for (int j = 0; j < histograms[0].size(); j++) {
+		for (int i = 0; i < histograms.size(); i++) {
+			ofile << histograms[i][j] << " ";
+		}
+		ofile << endl;
+	}
+}
+
 int main(int argc, char * argv[]) {
 	ifstream ifile(argv[1]);
 	string text;
@@ -121,6 +158,7 @@ int main(int argc, char * argv[]) {
 
 	vector<string> filenames;
 	vector<float> rms, skew, kurtosis, mean;
+	vector<vector<vec3> > all_data;
 
 	while (ifile.fail() == false) {
 		getline(ifile, text);
@@ -156,61 +194,64 @@ int main(int argc, char * argv[]) {
 		cout << min_p.x << " " << min_p.y << " " << min_p.z << endl;
 		cout << max_p.x << " " << max_p.y << " " << max_p.z << endl;
 
-		cout<<rms[rms.size()-1]<<endl;
-		cout<<skew[rms.size()-1]<<endl;
-		cout<<kurtosis[rms.size()-1]<<endl;
-		cout<<mean[rms.size()-1]<<endl;
+		cout << rms[rms.size() - 1] << endl;
+		cout << skew[rms.size() - 1] << endl;
+		cout << kurtosis[rms.size() - 1] << endl;
+		cout << mean[rms.size() - 1] << endl;
 
+		all_data.push_back(cloud.data);
 
-
-		bbox_scale = (max_t-min_t);
-
-
-		glutInit(&argc, argv);
-		glutInitWindowSize(1024, 512);
-		glutInitWindowPosition(0, 0);
-		glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
-
-		window.window_handle = glutCreateWindow("XYZ_Visualizer");
-		glutReshapeFunc(ReshapeFunc);
-		glutDisplayFunc(DisplayFunc);
-		glutKeyboardFunc(KeyboardFunc);
-		glutSpecialFunc(SpecialFunc);
-		glutMouseFunc(CallBackMouseFunc);
-		glutMotionFunc(CallBackMotionFunc);
-		glutPassiveMotionFunc(CallBackPassiveFunc);
-		glutTimerFunc(window.interval, TimerFunc, 0);
-
-		glEnable(GL_POINT_SMOOTH);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glewExperimental = GL_TRUE;
-
-		if (glewInit() != GLEW_OK) {
-			cerr << "GLEW failed to initialize." << endl;
-			return 0;
-		}
-
-		camera.SetMode(FREE);
-		camera.SetPosition(glm::vec3(0, 0, 0));
-		camera.SetLookAt(cloud.data[0]);
-		camera.SetClipping(.1, 1000);
-		camera.SetFOV(45);
-
-		cloud_shader.Initialize("phong.vert", "phong.frag");
-		cloud_shader.SetTime(0);
-		point_cloud.Initialize(cloud.data);
-		//
-		point_cloud.AttachShader(&cloud_shader);
-		glutMainLoop();
+//		bbox_scale = (max_t-min_t);
+//
+//
+//		glutInit(&argc, argv);
+//		glutInitWindowSize(1024, 512);
+//		glutInitWindowPosition(0, 0);
+//		glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH);
+//
+//		window.window_handle = glutCreateWindow("XYZ_Visualizer");
+//		glutReshapeFunc(ReshapeFunc);
+//		glutDisplayFunc(DisplayFunc);
+//		glutKeyboardFunc(KeyboardFunc);
+//		glutSpecialFunc(SpecialFunc);
+//		glutMouseFunc(CallBackMouseFunc);
+//		glutMotionFunc(CallBackMotionFunc);
+//		glutPassiveMotionFunc(CallBackPassiveFunc);
+//		glutTimerFunc(window.interval, TimerFunc, 0);
+//
+//		glEnable(GL_POINT_SMOOTH);
+//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//
+//		glewExperimental = GL_TRUE;
+//
+//		if (glewInit() != GLEW_OK) {
+//			cerr << "GLEW failed to initialize." << endl;
+//			return 0;
+//		}
+//
+//		camera.SetMode(FREE);
+//		camera.SetPosition(glm::vec3(0, 0, 0));
+//		camera.SetLookAt(cloud.data[0]);
+//		camera.SetClipping(.1, 1000);
+//		camera.SetFOV(45);
+//
+//		cloud_shader.Initialize("phong.vert", "phong.frag");
+//		cloud_shader.SetTime(0);
+//		point_cloud.Initialize(cloud.data);
+//		//
+//		point_cloud.AttachShader(&cloud_shader);
+//		glutMainLoop();
 
 	}
 
 	ofstream ofile("full_out.txt");
-	rms, skew, kurtosis, mean;
 	for (int i = 0; i < filenames.size(); i++) {
-		ofile<<filenames[i]<<" "<<rms[i]<<" "<<skew[i]<<" "<<kurtosis[i]<<" "<<mean[i]<<endl;
+		ofile << filenames[i] << " " << rms[i] << " " << skew[i] << " " << kurtosis[i] << " " << mean[i] << endl;
 	}
-ofile.close();
+	ofile.close();
+
+	DumpHist(all_data,"hists.txt", min_p, max_p);
+
+
 	return 0;
 }
