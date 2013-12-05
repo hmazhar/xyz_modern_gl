@@ -132,6 +132,16 @@ void Histogram_(vector<vec3> &data, vector<int> &hist, vec3 min_p, vec3 max_p) {
 		}
 		hist[bin]++;
 	}
+	//normalize
+
+	int total = std::accumulate(hist.begin(), hist.end(), 0);
+
+	for (int i = 0; i < hist.size(); i++) {
+		hist[i]=hist[i]/total;
+	}
+
+
+
 }
 void DumpHist(vector<vector<vec3> > all_data, string fname, vec3 min_p, vec3 max_p) {
 	vector<vector<int> > histograms(all_data.size());
@@ -202,7 +212,6 @@ int main(int argc, char * argv[]) {
 		all_data.push_back(cloud.data);
 
 //		bbox_scale = (max_t-min_t);
-//
 //
 //		glutInit(&argc, argv);
 //		glutInitWindowSize(1024, 512);
