@@ -112,7 +112,7 @@ void TimerFunc(int value) {
 	}
 }
 
-void Histogram_(vector<vec3> &data, vector<int> &hist, vec3 min_p, vec3 max_p) {
+void Histogram_(vector<vec3> &data, vector<float> &hist, vec3 min_p, vec3 max_p) {
 	int BIN_COUNT = 256;
 	hist.clear();
 	hist.resize(BIN_COUNT, 0);
@@ -137,14 +137,14 @@ void Histogram_(vector<vec3> &data, vector<int> &hist, vec3 min_p, vec3 max_p) {
 	int total = std::accumulate(hist.begin(), hist.end(), 0);
 
 	for (int i = 0; i < hist.size(); i++) {
-		hist[i]=hist[i]/total;
+		hist[i]=hist[i]/float(total);
 	}
 
 
 
 }
 void DumpHist(vector<vector<vec3> > all_data, string fname, vec3 min_p, vec3 max_p) {
-	vector<vector<int> > histograms(all_data.size());
+	vector<vector<float> > histograms(all_data.size());
 
 	for (int i = 0; i < all_data.size(); i++) {
 		Histogram_(all_data[i], histograms[i], min_p, max_p);
